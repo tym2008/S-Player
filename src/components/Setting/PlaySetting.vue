@@ -73,6 +73,13 @@
         </div>
         <n-switch v-model:value="settingStore.useSongUnlock" class="set" :round="false" />
       </n-card>
+      <n-card class="set-item">
+        <div class="label">
+          <n-text class="name">听歌打卡</n-text>
+          <n-text class="tip" :depth="3">是否将播放歌曲同步至网易云音乐</n-text>
+        </div>
+        <n-switch v-model:value="settingStore.scrobbleSong" class="set" :round="false" />
+      </n-card>
       <n-card v-if="isElectron" class="set-item">
         <div class="label">
           <n-text class="name">音频输出设备</n-text>
@@ -169,6 +176,18 @@
       </n-card>
       <n-card class="set-item">
         <div class="label">
+          <n-text class="name">动态封面</n-text>
+          <n-text class="tip" :depth="3">可展示部分歌曲的动态封面，仅在封面模式有效</n-text>
+        </div>
+        <n-switch
+          v-model:value="settingStore.dynamicCover"
+          :disabled="isLogin() !== 1"
+          :round="false"
+          class="set"
+        />
+      </n-card>
+      <n-card class="set-item">
+        <div class="label">
           <n-text class="name">音乐频谱</n-text>
           <n-text class="tip" :depth="3">开启音乐频谱会极大影响性能，如遇问题请关闭</n-text>
         </div>
@@ -208,6 +227,7 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui";
 import { useSettingStore } from "@/stores";
+import { isLogin } from "@/utils/auth";
 import { isElectron, renderOption } from "@/utils/helper";
 import { uniqBy } from "lodash";
 import player from "@/utils/player";

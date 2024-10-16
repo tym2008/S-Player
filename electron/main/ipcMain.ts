@@ -142,8 +142,10 @@ const initWinIpcMain = (
 
   // 切换桌面歌词
   ipcMain.on("change-desktop-lyric", (_, val: boolean) => {
-    val ? lyricWin?.show() : lyricWin?.hide();
-    if (val) lyricWin?.setAlwaysOnTop(true, "screen-saver");
+    if (val) {
+      lyricWin?.show();
+      lyricWin?.setAlwaysOnTop(true, "screen-saver");
+    } else lyricWin?.hide();
   });
 
   // 是否阻止系统息屏
@@ -664,6 +666,10 @@ const initTrayIpcMain = (
 // thumbar
 const initThumbarIpcMain = (thumbar: Thumbar | null): void => {
   if (!thumbar) return;
+  // 更新工具栏
+  ipcMain.on("play-status-change", (_, playStatus: boolean) => {
+    thumbar?.updateThumbar(playStatus);
+  });
 };
 
 // store

@@ -449,6 +449,7 @@ const changeVolume = (e: WheelEvent) => {
           transition: color 0.3s;
         }
         .like {
+          color: var(--primary-hex);
           margin-left: 8px;
           transition: transform 0.3s;
           cursor: pointer;
@@ -598,9 +599,6 @@ const changeVolume = (e: WheelEvent) => {
   width: 64px;
   height: 200px;
   padding: 12px 16px;
-  .n-slider {
-    --n-rail-width-vertical: 18px;
-  }
   .slider-num {
     margin-top: 4px;
     font-size: 12px;

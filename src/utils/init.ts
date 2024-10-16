@@ -3,7 +3,9 @@ import { useEventListener } from "@vueuse/core";
 import { openUserAgreement } from "@/utils/modal";
 import { debounce } from "lodash-es";
 import { isElectron } from "./helper";
+import packageJson from "@/../package.json";
 import player from "@/utils/player";
+import log from "./log";
 
 // 应用初始化时需要执行的操作
 const init = async () => {
@@ -12,6 +14,8 @@ const init = async () => {
   const statusStore = useStatusStore();
   const settingStore = useSettingStore();
   const shortcutStore = useShortcutStore();
+
+  printVersion();
 
   // 用户协议
   openUserAgreement();
@@ -22,7 +26,10 @@ const init = async () => {
   // 加载数据
   await dataStore.loadData();
   // 初始化播放器
-  player.initPlayer(settingStore.autoPlay);
+  player.initPlayer(
+    settingStore.autoPlay,
+    settingStore.memoryLastSeek ? statusStore.currentTime : 0,
+  );
   // 同步播放模式
   player.playModeSyncIpc();
 
@@ -100,5 +107,11 @@ const keyDownEvent = debounce((event: KeyboardEvent) => {
     }
   }
 }, 100);
+
+// 版本输出
+const printVersion = async () => {
+  log.success(`🚀 ${packageJson.version}`, packageJson.productName);
+  log.info(`👤 ${packageJson.author}`, packageJson.github);
+};
 
 export default init;
