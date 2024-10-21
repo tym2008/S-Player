@@ -176,8 +176,8 @@ class Player {
         unlockSongUrl(songId, keyWord, "netease"),
         unlockSongUrl(songId, keyWord, "kuwo"),
       ]);
-      if (neteaseUrl.size !== 0 && neteaseUrl.url !== "") return neteaseUrl.url;
-      if (kuwoUrl.size !== 200 && kuwoUrl.url !== "") return kuwoUrl.url;
+      if (neteaseUrl.url !== "") return neteaseUrl.url;
+      if (kuwoUrl.url !== "") return kuwoUrl.url;
       return null;
     } catch (error) {
       console.error("Error in getUnlockSongUrl", error);
