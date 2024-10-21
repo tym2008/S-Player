@@ -51,28 +51,55 @@ export const unlockSongUrl = async (
   id: number,
   keyword: string,
   server: "netease" | "kuwo"
-): Promise<string | null> => {
+): Promise<any> => { 
+  // 创建错误响应对象
+  const createErrorResponse = (status: number, message: string) => {
+    return {
+      status,
+      data: {
+        error: message,
+      },
+    };
+  };
+
   if (server === "netease") {
     try {
       const response = await axios.get(
         `https://music-api.gdstudio.xyz/api.php?types=url&source=netease&id=${id}&br=320`
       );
-      return response.data?.url || null;
+      const songUrl = response.data?.url;
+      if (songUrl) {
+        const audioResponse = await axios.get(songUrl);
+        return audioResponse;
+      } else {
+        console.error("Netease API Error: Song URL not found.");
+        return createErrorResponse(404, "Netease Song URL not found."); 
+      }
     } catch (error) {
       console.error("Netease API Error:", error);
-      return null;
+      return createErrorResponse(500, "Netease API Error."); 
     }
   } else if (server === "kuwo") {
     try {
       const songId = await getKuwoSongId(keyword);
-      if (!songId) return null;
-      return await getKuwoSongUrl(songId);
+      if (!songId) {
+        return createErrorResponse(404, "Kuwo Song ID not found."); 
+      }
+      const songUrl = await getKuwoSongUrl(songId);
+      if (songUrl) {
+        const audioResponse = await axios.get(songUrl);
+        return audioResponse;
+      } else {
+        console.error("Kuwo API Error: Song URL not found.");
+        return createErrorResponse(404, "Kuwo Song URL not found."); 
+      }
     } catch (error) {
       console.error("Kuwo API Error:", error);
-      return null;
+      return createErrorResponse(500, "Kuwo API Error."); 
     }
+  } else {
+    return createErrorResponse(400, "Invalid server type."); 
   }
-  return null;
 };
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
