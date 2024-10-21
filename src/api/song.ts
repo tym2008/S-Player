@@ -1,5 +1,6 @@
 import { songLevelData } from "@/utils/meta";
 import request from "@/utils/request";
+import axios from "axios"
 
 // 获取歌曲详情
 export const songDetail = (ids: number | number[]) => {
@@ -46,13 +47,68 @@ export const songUrl = (
 };
 
 // 获取解锁歌曲 URL
-export const unlockSongUrl = (id: number, keyword: string, server: "netease" | "kuwo") => {
-  const params = server === "netease" ? { id } : { keyword };
-  return request({
-    baseURL: "/api/unblock",
-    url: `/${server}`,
-    params,
-  });
+export const unlockSongUrl = async (
+  id: number,
+  keyword: string,
+  server: "netease" | "kuwo"
+): Promise<string | null> => {
+  if (server === "netease") {
+    try {
+      const response = await axios.get(
+        `https://music-api.gdstudio.xyz/api.php?types=url&source=netease&id=${id}&br=320`
+      );
+      return response.data?.url || null;
+    } catch (error) {
+      console.error("Netease API Error:", error);
+      return null;
+    }
+  } else if (server === "kuwo") {
+    try {
+      const songId = await getKuwoSongId(keyword);
+      if (!songId) return null;
+      return await getKuwoSongUrl(songId);
+    } catch (error) {
+      console.error("Kuwo API Error:", error);
+      return null;
+    }
+  }
+  return null;
+};
+
+const getKuwoSongId = async (keyword: string): Promise<string | null> => {
+  const response = await axios.get(
+    `http://search.kuwo.cn/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
+  );
+  return (
+    response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
+      "MUSIC_".length
+    ) || null
+  );
+};
+
+const getKuwoSongUrl = async (songId: string): Promise<string | null> => {
+  const key = "ylzsxkwm";
+  const packageName = "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk";
+  const query = `corp=kuwo&source=${packageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
+  const encryptedQuery = Buffer.from(query)
+    .toString("hex")
+    .split(/(.{2})/)
+    .slice(1, -1)
+    .map((byte, index) =>
+      (
+        parseInt(byte, 16) ^ key.charCodeAt(index % key.length)
+      ).toString(16)
+    )
+    .join("");
+  const response = await axios.get(
+    `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`,
+    {
+      headers: {
+        "User-Agent": "okhttp/3.10.0",
+      },
+    }
+  );
+  return response.data?.match(/http[^\s$"]+/)?.[0] || null;
 };
 
 // 获取歌曲歌词
