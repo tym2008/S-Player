@@ -1,4 +1,5 @@
 import Store from "electron-store";
+import { screen } from "electron";
 import log from "./logger";
 
 log.info("🌱 Store init");
@@ -34,8 +35,8 @@ const store = new Store<StoreType>({
       fontSize: 30,
       mainColor: "#fff",
       shadowColor: "rgba(0, 0, 0, 0.5)",
-      x: 0,
-      y: 0,
+      x: screen.getPrimaryDisplay().workAreaSize.width / 2 - 400,
+      y: screen.getPrimaryDisplay().workAreaSize.height - 90,
       width: 800,
       height: 180,
     },
