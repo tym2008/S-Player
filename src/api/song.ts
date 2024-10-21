@@ -103,7 +103,7 @@ export const unlockSongUrl = async (
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
   const response = await axios.get(
-    `http://search.kuwo.cn/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
+    `https://search.kuwo.cn/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
   );
   return (
     response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
@@ -127,7 +127,7 @@ const getKuwoSongUrl = async (songId: string): Promise<string | null> => {
     )
     .join("");
   const response = await axios.get(
-    `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`,
+    `https://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`,
     {
       headers: {
         "User-Agent": "okhttp/3.10.0",
