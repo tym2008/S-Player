@@ -1,6 +1,5 @@
 import { songLevelData } from "@/utils/meta";
 import request from "@/utils/request";
-import axios from "axios"
 
 // 获取歌曲详情
 export const songDetail = (ids: number | number[]) => {
@@ -69,8 +68,7 @@ export const unlockSongUrl = async (
       );
       const songUrl = response.data?.url;
       if (songUrl) {
-        const audioResponse = await axios.get(songUrl);
-        return audioResponse;
+        return request({"url":songUrl});
       } else {
         console.error("Netease API Error: Song URL not found.");
         return createErrorResponse(404, "Netease Song URL not found."); 
