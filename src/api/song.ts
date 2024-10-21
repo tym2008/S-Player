@@ -68,7 +68,7 @@ export const unlockSongUrl = async (
       );
       const songUrl = response.data?.url;
       if (songUrl) {
-        return rsongUrl;
+        return songUrl;
       } else {
         console.error("Netease API Error: Song URL not found.");
         return createErrorResponse();
