@@ -527,7 +527,7 @@ class Player {
           await this.createPlayer(url, autoPlay, seek);
         }
         // 尝试解灰
-        else if (isElectron && type !== "radio" && settingStore.useSongUnlock) {
+        else if (type !== "radio" && settingStore.useSongUnlock) {
           console.log("尝试解灰音乐")
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           console.log("解灰结果:",unlockUrl)
