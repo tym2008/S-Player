@@ -68,7 +68,7 @@ export const unlockSongUrl = async (
       );
       const songUrl = response.data?.url;
       if (songUrl) {
-        return response.data?;
+        return rsongUrl;
       } else {
         console.error("Netease API Error: Song URL not found.");
         return createErrorResponse();
@@ -85,8 +85,7 @@ export const unlockSongUrl = async (
       }
       const songUrl = await getKuwoSongUrl(songId);
       if (songUrl) {
-        const audioResponse = await axios.get(songUrl);
-        return audioResponse;
+        return songUrl;
       } else {
         console.error("Kuwo API Error: Song URL not found.");
         return createErrorResponse();
