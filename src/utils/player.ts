@@ -531,7 +531,8 @@ class Player {
         else if (type !== "radio" && settingStore.useSongUnlock) {
           window.$message.warning("尝试解灰音乐");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
-          window.$message.warning("解灰结果:",unlockUrl);
+          window.$message.warning("解灰结果:");
+          window.$message.warning(unlockUrl);
           if (unlockUrl) {
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
