@@ -138,7 +138,7 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
 
     return { code: 404, url: null };
   } catch (error) {
-    log.error(" Get KuwoSong URL Error:", error);
+    console.error(" Get KuwoSong URL Error:", error);
     return { code: 404, url: null };
   }
 };
