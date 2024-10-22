@@ -111,6 +111,7 @@ const getKuwoSongId = async (keyword: string): Promise<string | null> => {
     ) || null
   );
 };
+
 const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
   try {
     if (!keyword) return { code: 404, url: null };
@@ -131,7 +132,7 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
 
     if (response.data) {
       const urlMatch = response.data.match(/http[^\s$"]+/)[0];
-      log.info(" KuwoSong URL:", urlMatch);
+      console.log(" KuwoSong URL:", urlMatch);
       return { code: 200, url: urlMatch };
     }
 
