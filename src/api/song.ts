@@ -1,5 +1,7 @@
 import { songLevelData } from "@/utils/meta";
 import request from "@/utils/request";
+import { encryptQuery } from "./kwDES";
+import { SongUrlResult } from "./unblock";
 import axios from "axios";
 
 // 获取歌曲详情
