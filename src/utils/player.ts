@@ -528,9 +528,8 @@ class Player {
         }
         // 尝试解灰
         else if (type !== "radio" && settingStore.useSongUnlock) {
-          //console.log("尝试解灰音乐")
-          const artist = Array.isArray(songData.artists) ? songData.artists[0].name : songData.artists;
-          const keyWord = songData.name + "-" + artist;
+          const artist = Array.isArray(playSongData.artists) ? playSongData.artists[0].name : playSongData.artists;
+          const keyWord = playSongData.name + "-" + artist;
           window.$message.warning("尝试解灰音乐,Keyword:"+keyWord);
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           window.$message.warning("解灰结果:",unlockUrl)
