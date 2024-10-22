@@ -1,6 +1,5 @@
 import { songLevelData } from "@/utils/meta";
 import request from "@/utils/request";
-import { encryptQuery } from "./kwDES";
 import { SongUrlResult } from "./unblock";
 import axios from "axios";
 
@@ -111,7 +110,6 @@ const getKuwoSongId = async (keyword: string): Promise<string | null> => {
     ) || null
   );
 };
-
 const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
   try {
     if (!keyword) return { code: 404, url: null };
@@ -123,7 +121,7 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
     const query = `corp=kuwo&source=${PackageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
     const encryptedQuery = encryptQuery(query);
 
-    const url = `http://kw-mapi.tym.us.kg/mobi.s?f=kuwo&q=${encryptedQuery}`;
+    const url = `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`;
     const response = await axios.get(url, {
       headers: {
         "User-Agent": "okhttp/3.10.0",
