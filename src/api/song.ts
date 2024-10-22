@@ -109,30 +109,35 @@ const getKuwoSongId = async (keyword: string): Promise<string | null> => {
     ) || null
   );
 };
+const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
+  try {
+    if (!keyword) return { code: 404, url: null };
+    const songId = await getKuwoSongId(keyword);
+    if (!songId) return { code: 404, url: null };
 
-const getKuwoSongUrl = async (songId: string): Promise<string | null> => {
-  const key = "ylzsxkwm";
-  const packageName = "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk";
-  const query = `corp=kuwo&source=${packageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
-  const encryptedQuery = Buffer.from(query)
-    .toString("hex")
-    .split(/(.{2})/)
-    .slice(1, -1)
-    .map((byte, index) =>
-      (
-        parseInt(byte, 16) ^ key.charCodeAt(index % key.length)
-      ).toString(16)
-    )
-    .join("");
-  const response = await axios.get(
-    `https://kw-mapi.tym.us.kg/mobi.s?f=kuwo&q=${encryptedQuery}`,
-    {
+    // 请求地址
+    const PackageName = "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk";
+    const query = `corp=kuwo&source=${PackageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
+    const encryptedQuery = encryptQuery(query);
+
+    const url = `http://kw-mapi.tym.us.kg/mobi.s?f=kuwo&q=${encryptedQuery}`;
+    const response = await axios.get(url, {
       headers: {
         "User-Agent": "okhttp/3.10.0",
       },
+    });
+
+    if (response.data) {
+      const urlMatch = response.data.match(/http[^\s$"]+/)[0];
+      log.info(" KuwoSong URL:", urlMatch);
+      return { code: 200, url: urlMatch };
     }
-  );
-  return response.data?.match(/http[^\s$"]+/)?.[0] || null;
+
+    return { code: 404, url: null };
+  } catch (error) {
+    log.error(" Get KuwoSong URL Error:", error);
+    return { code: 404, url: null };
+  }
 };
 
 // 获取歌曲歌词
