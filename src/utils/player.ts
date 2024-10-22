@@ -171,6 +171,7 @@ class Player {
       const artist = Array.isArray(songData.artists) ? songData.artists[0].name : songData.artists;
       const keyWord = songData.name + "-" + artist;
       if (!songId || !keyWord) return null;
+      window.$message.warning("Keyword:"+keyWord+" songId"+songId);
       // 尝试解锁
       const [neteaseUrl, kuwoUrl] = await Promise.all([
         unlockSongUrl(songId, keyWord, "netease"),
@@ -528,9 +529,7 @@ class Player {
         }
         // 尝试解灰
         else if (type !== "radio" && settingStore.useSongUnlock) {
-          const artist = Array.isArray(playSongData.artists) ? playSongData.artists[0].name : playSongData.artists;
-          const keyWord = playSongData.name + "-" + artist;
-          window.$message.warning("尝试解灰音乐,Keyword:"+keyWord);
+          window.$message.warning("尝试解灰音乐");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           window.$message.warning("解灰结果:",unlockUrl)
           if (unlockUrl) {
