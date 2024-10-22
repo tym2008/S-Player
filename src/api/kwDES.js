@@ -1,4 +1,4 @@
-// kwDES.ts
+// kwDES.js
 /*
 	Thanks to
 	https://github.com/XuShaohua/kwplayer/blob/master/kuwo/DES.py
@@ -6,11 +6,10 @@
 */
 
 // 使用 JavaScript 的 BigInt 类型模拟 Long 对象
-const Long = (n: number | bigint) => BigInt(n);
+const Long = (n) => BigInt(n); 
 
-const range = (n: number) => Array.from(new Array(n).keys());
-const power = (base: bigint, index: number) =>
-  Array(index).fill(null).reduce((result, _) => result * base, 1n);
+const range = (n) => Array.from(new Array(n).keys());
+const power = (base, index) => Array(index).fill(null).reduce((result, _) => result * base, 1n);
 
 // EXPANSION
 const arrayE = [
@@ -18,7 +17,7 @@ const arrayE = [
   -1, -1, 11, 12, 13, 14, 15, 16, -1, -1, 15, 16, 17, 18, 19, 20, -1, -1,
   19, 20, 21, 22, 23, 24, -1, -1, 23, 24, 25, 26, 27, 28, -1, -1, 27, 28,
   29, 30, 31, 30, -1, -1,
-].map((n) => BigInt(n >= 0 ? n : 0xffffffff));
+].map((n) => Long(n >= 0 ? n : 0xffffffff));
 
 // INITIAL_PERMUTATION
 const arrayIP = [
@@ -26,7 +25,7 @@ const arrayIP = [
   37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7, 56, 48, 40, 32, 24, 16,
   8, 0, 58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4, 62,
   54, 46, 38, 30, 22, 14, 6,
-].map((n) => BigInt(n));
+].map((n) => Long(n));
 
 // INVERSE_PERMUTATION
 const arrayIP_1 = [
@@ -34,26 +33,26 @@ const arrayIP_1 = [
   13, 53, 21, 61, 29, 36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19,
   59, 27, 34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25, 32,
   0, 40, 8, 48, 16, 56, 24,
-].map((n) => BigInt(n));
+].map((n) => Long(n));
 
 // ROTATES
 const arrayLs = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
-const arrayLsMask = [0n, 0x100001n, 0x300003n];
+const arrayLsMask = [0n, 0x100001n, 0x300003n]; 
 const arrayMask = range(64).map((n) => power(2n, n));
-arrayMask[arrayMask.length - 1] *= -1n;
+arrayMask[arrayMask.length - 1] *= -1n; 
 
 // PERMUTATION
 const arrayP = [
   15, 6, 19, 20, 28, 11, 27, 16, 0, 14, 22, 25, 4, 17, 30, 9, 1, 7, 23, 13,
   31, 26, 2, 8, 18, 12, 29, 5, 21, 10, 3, 24,
-].map((n) => BigInt(n));
+].map((n) => Long(n));
 
 // PERMUTED_CHOICE1
 const arrayPC_1 = [
   56, 48, 40, 32, 24, 16, 8, 0, 57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42,
   34, 26, 18, 10, 2, 59, 51, 43, 35, 62, 54, 46, 38, 30, 22, 14, 6, 61, 53,
   45, 37, 29, 21, 13, 5, 60, 52, 44, 36, 28, 20, 12, 4, 27, 19, 11, 3,
-].map((n) => BigInt(n >= 0 ? n : 0xffffffff));
+].map((n) => Long(n >= 0 ? n : 0xffffffff)); 
 
 // PERMUTED_CHOICE2
 const arrayPC_2 = [
@@ -61,7 +60,7 @@ const arrayPC_2 = [
   25, 7, -1, -1, 15, 6, 26, 19, 12, 1, -1, -1, 40, 51, 30, 36, 46, 54, -1,
   -1, 29, 39, 50, 44, 32, 47, -1, -1, 43, 48, 38, 55, 33, 52, -1, -1, 45, 41,
   49, 35, 28, 31, -1, -1,
-].map((n) => BigInt(n >= 0 ? n : 0xffffffff));
+].map((n) => Long(n >= 0 ? n : 0xffffffff));
 
 const matrixNSBox = [
   [
@@ -114,7 +113,7 @@ const matrixNSBox = [
   ],
 ];
 
-const bitTransform = (arrInt: bigint[], n: number, l: bigint): bigint => {
+const bitTransform = (arrInt, n, l) => {
   let l2 = 0n;
   for (let i = 0; i < n; i++) {
     if (l & (1n << arrInt[i])) {
@@ -124,48 +123,47 @@ const bitTransform = (arrInt: bigint[], n: number, l: bigint): bigint => {
   return l2;
 };
 
-const DES64 = (longs: bigint[], l: bigint): bigint => {
+const DES64 = (longs, l) => {
   const pR = range(8).map(() => 0n);
   const pSource = [0n, 0n];
   let L = 0n;
   let R = 0n;
   let out = bitTransform(arrayIP, 64, l);
   pSource[0] = out & 0xffffffffn;
-  pSource[1] = (out & 0xffffffff00000000n) >> 32n;
+  pSource[1] = (out & 0xffffffff00000000n) >> 32n; 
 
   for (let i = 0; i < 16; i++) {
     let SOut = 0n;
 
     R = pSource[1];
     R = bitTransform(arrayE, 64, R);
-    R = R ^ longs[i];
+    R = R ^ longs[i]; 
     for (let j = 0; j < 8; j++) {
-      pR[j] = (R >> BigInt(j * 8)) & 0xffn;
+      pR[j] = (R >> BigInt(j * 8)) & 0xffn; 
     }
     for (let sbi = 7; sbi >= 0; sbi--) {
-      SOut = (SOut << 4n) | BigInt(matrixNSBox[sbi][Number(pR[sbi])]);
+      SOut = (SOut << 4n) | BigInt(matrixNSBox[sbi][Number(pR[sbi])]); 
     }
     R = bitTransform(arrayP, 32, SOut);
     L = pSource[0];
     pSource[0] = pSource[1];
-    pSource[1] = L ^ R;
+    pSource[1] = L ^ R; 
   }
 
+  // Swap pSource[0] and pSource[1]
   [pSource[0], pSource[1]] = [pSource[1], pSource[0]];
   out = (pSource[1] << 32n) | pSource[0];
   out = bitTransform(arrayIP_1, 64, out);
   return out;
 };
 
-const subKeys = (l: bigint, longs: bigint[], n: number) => {
+const subKeys = (l, longs, n) => {
   let l2 = bitTransform(arrayPC_1, 56, l);
   for (let i = 0; i < 16; i++) {
-    l2 =
-      (((l2 & arrayLsMask[arrayLs[i]]) << BigInt(28 - arrayLs[i])) |
-        (l2 & (arrayLsMask[arrayLs[i]] ^ ((1n << 56n) - 1n))) >>
-          BigInt(arrayLs[i])) &
-      ((1n << 56n) - 1n);
-    longs[i] = bitTransform(arrayPC_2, 64, l2);
+    l2 = (((l2 & arrayLsMask[arrayLs[i]]) << BigInt(28 - arrayLs[i])) | 
+        (l2 & (arrayLsMask[arrayLs[i]] ^ ((1n << 56n) - 1n))) >> BigInt(arrayLs[i])) & 
+        ((1n << 56n) - 1n);
+    longs[i] = bitTransform(arrayPC_2, 64, l2); 
   }
   if (n === 1) {
     for (let j = 0; j < 8; j++) {
@@ -174,14 +172,14 @@ const subKeys = (l: bigint, longs: bigint[], n: number) => {
   }
 };
 
-const crypt = (msg: Uint8Array, key: Uint8Array, mode: number): Uint8Array => {
+const crypt = (msg, key, mode) => {
   // 处理密钥块
-  let l = 0n;
+  let l = 0n; 
   for (let i = 0; i < 8; i++) {
-    l |= BigInt(key[i]) << BigInt(i * 8);
+    l |= BigInt(key[i]) << BigInt(i * 8); 
   }
 
-  const j = Math.floor(msg.length / 8);
+  const j = Math.floor(msg.length / 8); 
   // arrLong1 存放的是转换后的密钥块, 在解密时只需要把这个密钥块反转就行了
 
   const arrLong1 = range(16).map(() => 0n);
@@ -192,14 +190,12 @@ const crypt = (msg: Uint8Array, key: Uint8Array, mode: number): Uint8Array => {
 
   for (let m = 0; m < j; m++) {
     for (let n = 0; n < 8; n++) {
-      arrLong2[m] |= BigInt(msg[n + m * 8]) << BigInt(n * 8);
+      arrLong2[m] |= BigInt(msg[n + m * 8]) << BigInt(n * 8); 
     }
   }
 
   // 用于存放密文
-  const arrLong3 = range(Math.floor((1 + 8 * (j + 1)) / 8)).map(
-    () => 0n
-  );
+  const arrLong3 = range(Math.floor((1 + 8 * (j + 1)) / 8)).map(() => 0n);
 
   // 计算前部的数据块(除了最后一部分)
   for (let i1 = 0; i1 < j; i1++) {
@@ -207,11 +203,11 @@ const crypt = (msg: Uint8Array, key: Uint8Array, mode: number): Uint8Array => {
   }
 
   // 保存多出来的字节
-  const arrByte1 = msg.slice(j * 8);
+  const arrByte1 = msg.slice(j * 8); 
   let l2 = 0n;
 
   for (let i1 = 0; i1 < arrByte1.length; i1++) {
-    l2 |= BigInt(arrByte1[i1]) << BigInt(i1 * 8);
+    l2 |= BigInt(arrByte1[i1]) << BigInt(i1 * 8); 
   }
 
   // 计算多出的那一位(最后一位)
@@ -222,20 +218,19 @@ const crypt = (msg: Uint8Array, key: Uint8Array, mode: number): Uint8Array => {
   let i4 = 0;
   arrLong3.forEach((l3) => {
     for (let i6 = 0; i6 < 8; i6++) {
-      arrByte2[i4] = Number((l3 >> BigInt(i6 * 8)) & 0xffn);
+      arrByte2[i4] = Number((l3 >> BigInt(i6 * 8)) & 0xffn); 
       i4 += 1;
     }
   });
+
   return Uint8Array.from(arrByte2);
 };
 
-const SECRET_KEY = new TextEncoder().encode("ylzsxkwm");
-export const encrypt = (msg: Uint8Array): Uint8Array =>
-  crypt(msg, SECRET_KEY, 0);
-export const decrypt = (msg: Uint8Array): Uint8Array =>
-  crypt(msg, SECRET_KEY, 1);
-export const encryptQuery = (query: string): string => {
+const SECRET_KEY = new TextEncoder().encode("ylzsxkwm"); 
+export const encrypt = (msg) => crypt(msg, SECRET_KEY, 0);
+export const decrypt = (msg) => crypt(msg, SECRET_KEY, 1);
+export const encryptQuery = (query) => {
   const msg = new TextEncoder().encode(query);
   const encrypted = crypt(msg, SECRET_KEY, 0);
-  return btoa(String.fromCharCode(...encrypted));
+  return btoa(String.fromCharCode(...encrypted)); 
 };
