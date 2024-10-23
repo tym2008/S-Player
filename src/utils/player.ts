@@ -529,10 +529,10 @@ class Player {
         }
         // 尝试解灰
         else if (type !== "radio" && settingStore.useSongUnlock) {
-          window.$message.warning("尝试替换音源");
+          window.$message.warning("Netease API 无法获取 尝试替换音源");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           if (unlockUrl) {
-            window.$message.success("替换成功 结果:"+unlockUrl.slice(0, 50));
+            window.$message.success("替换成功 结果:"+unlockUrl.slice(0, 50)+"...");
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
             await this.createPlayer(unlockUrl, autoPlay, seek);
