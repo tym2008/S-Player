@@ -532,7 +532,7 @@ class Player {
           window.$message.warning("尝试替换音源");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           if (unlockUrl) {
-            window.$message.success("替换成功 结果:",unlockUrl.slice(0, 20));
+            window.$message.success("替换成功 结果:"+unlockUrl.slice(0, 20));
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
             await this.createPlayer(unlockUrl, autoPlay, seek);
