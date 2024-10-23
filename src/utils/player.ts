@@ -171,7 +171,7 @@ class Player {
       const artist = Array.isArray(songData.artists) ? songData.artists[0].name : songData.artists;
       const keyWord = songData.name + "-" + artist;
       if (!songId || !keyWord) return null;
-      window.$message.warning("Keyword:"+keyWord+" songId"+songId);
+      window.$message.warning("解灰参数 Keyword:"+keyWord+" songId:"+songId);
       // 尝试解锁
       const [neteaseUrl, kuwoUrl] = await Promise.all([
         unlockSongUrl(songId, keyWord, "netease"),
@@ -532,13 +532,12 @@ class Player {
           window.$message.warning("尝试解灰音乐");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           if (unlockUrl) {
-            window.$message.warning("解灰结果:");
-            window.$message.warning(unlockUrl);
+            window.$message.success("解灰成功 结果:"+unlockURL);
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
             await this.createPlayer(unlockUrl, autoPlay, seek);
           } else {
-            window.$message.warning("解灰失败")
+            window.$message.error("解灰失败")
             statusStore.playUblock = false;
             // 是否为最后一首
             if (statusStore.playIndex === dataStore.playList.length - 1) {
