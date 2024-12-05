@@ -171,13 +171,14 @@ class Player {
       const artist = Array.isArray(songData.artists) ? songData.artists[0].name : songData.artists;
       const keyWord = songData.name + "-" + artist;
       if (!songId || !keyWord) return null;
+      window.$message.warning("音源替换参数 Keyword:"+keyWord+" songId:"+songId);
       // 尝试解锁
       const [neteaseUrl, kuwoUrl] = await Promise.all([
         unlockSongUrl(songId, keyWord, "netease"),
         unlockSongUrl(songId, keyWord, "kuwo"),
       ]);
-      if (neteaseUrl.code === 200 && neteaseUrl.url !== "") return neteaseUrl.url;
-      if (kuwoUrl.code === 200 && kuwoUrl.url !== "") return kuwoUrl.url;
+      if (neteaseUrl !== "") return neteaseUrl;
+      if (kuwoUrl.url !== null && kuwoUrl.code === 200) return kuwoUrl.url;
       return null;
     } catch (error) {
       console.error("Error in getUnlockSongUrl", error);
@@ -515,8 +516,7 @@ class Player {
         await this.createPlayer(path, autoPlay, seek);
         // 获取歌曲元信息
         await this.parseLocalMusicInfo(path);
-      }
-      // 在线歌曲
+      }// 在线歌曲
       else if (id && dataStore.playList.length) {
         const songId = type === "radio" ? dj?.id : id;
         if (!songId) throw new Error("Get song id error");
@@ -524,16 +524,19 @@ class Player {
         // 正常播放地址
         if (url) {
           statusStore.playUblock = false;
-          await this.createPlayer(url, autoPlay, seek);
+          await this.createPlayer("https://proxy.tym.us.kg/"+url, autoPlay, seek);
         }
         // 尝试解灰
-        else if (isElectron && type !== "radio" && settingStore.useSongUnlock) {
+        else if (type !== "radio" && settingStore.useSongUnlock) {
+          window.$message.warning("Netease API 无法获取 尝试替换音源");
           const unlockUrl = await this.getUnlockSongUrl(playSongData);
           if (unlockUrl) {
+            window.$message.success("替换成功 结果:"+unlockUrl.slice(0, 50)+"...");
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
-            await this.createPlayer(unlockUrl, autoPlay, seek);
+            await this.createPlayer("https://proxy.tym.us.kg/"+unlockUrl, autoPlay, seek);
           } else {
+            window.$message.error("替换失败")
             statusStore.playUblock = false;
             // 是否为最后一首
             if (statusStore.playIndex === dataStore.playList.length - 1) {
@@ -544,7 +547,7 @@ class Player {
               this.nextOrPrev("next");
             }
           }
-        } else {
+        }else {
           if (dataStore.playList.length === 1) {
             this.resetStatus();
             window.$message.warning("当前播放列表已无可播放歌曲，请更换");
