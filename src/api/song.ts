@@ -45,15 +45,102 @@ export const songUrl = (
   });
 };
 
+
+
 // 获取解锁歌曲 URL
-export const unlockSongUrl = (id: number, keyword: string, server: "netease" | "kuwo") => {
-  const params = server === "netease" ? { id } : { keyword };
-  return request({
-    baseURL: "/api/unblock",
-    url: `/${server}`,
-    params,
-  });
+export const unlockSongUrl = async (
+  id: number,
+  keyword: string,
+  server: "netease" | "kuwo"
+): Promise<any> => {
+  // 创建错误响应对象
+  const createErrorResponse = () => {
+    return {
+      size: 0,
+      br: 320.001,
+      url: "",
+    };
+  };
+
+  if (server === "netease") {
+    try {
+      const response = await axios.get(
+        `https://gd-api.tym.us.kg/api.php?types=url&source=netease&id=${id}&br=128`
+      );
+      const songUrl = response.data?.url;
+      if (songUrl) {
+        return songUrl;
+      } else {
+        console.error("Netease API Error: Song URL not found.");
+        return createErrorResponse();
+      }
+    } catch (error) {
+      console.error("Netease API Error:", error);
+      return createErrorResponse();
+    }
+  } else if (server === "kuwo") {
+    try {
+      const songId = await getKuwoSongId(keyword);
+      if (!songId) {
+        return createErrorResponse();
+      }
+      const songUrl = await getKuwoSongUrl(songId);
+      if (songUrl) {
+        return songUrl;
+      } else {
+        console.error("Kuwo API Error: Song URL not found.");
+        return createErrorResponse();
+      }
+    } catch (error) {
+      console.error("Kuwo API Error:", error);
+      return createErrorResponse();
+    }
+  } else {
+    return createErrorResponse();
+  }
 };
+
+const getKuwoSongId = async (keyword: string): Promise<string | null> => {
+  const response = await axios.get(
+    `https://kw-api.tym.us.kg/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
+  );
+  return (
+    response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
+      "MUSIC_".length
+    ) || null
+  );
+};
+const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
+  try {
+    if (!keyword) return { code: 404, url: null };
+    const songId = await getKuwoSongId(keyword);
+    if (!songId) return { code: 404, url: null };
+
+    // 请求地址
+    const PackageName = "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk";
+    const query = `corp=kuwo&source=${PackageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
+    const encryptedQuery = encryptQuery(query);
+
+    const url = `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`;
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "okhttp/3.10.0",
+      },
+    });
+
+    if (response.data) {
+      const urlMatch = response.data.match(/http[^\s$"]+/)[0];
+      console.log(" KuwoSong URL:", urlMatch);
+      return { code: 200, url: urlMatch };
+    }
+
+    return { code: 404, url: null };
+  } catch (error) {
+    console.error(" Get KuwoSong URL Error:", error);
+    return { code: 404, url: null };
+  }
+};
+
 
 // 获取歌曲歌词
 export const songLyric = (id: number) => {
