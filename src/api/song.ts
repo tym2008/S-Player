@@ -3,7 +3,6 @@ import request from "@/utils/request";
 import { encryptQuery } from "./kwDES";
 import { SongUrlResult } from "./unblock";
 import axios from "axios";
-axios.defaults.maxRedirects = 5; // 允许最多 5 次重定向
 // 获取歌曲详情
 export const songDetail = (ids: number | number[]) => {
   return request({
@@ -49,14 +48,21 @@ export const songUrl = (
 };
 
 
+// 为每个域名创建一个单独的axios实例
+const neteaseApi = axios.create({ baseURL: '/netease-api' });
+const kuwoSearchApi = axios.create({ baseURL: '/kuwo-search-api' });
+const kuwoMobiApi = axios.create({ baseURL: '/kuwo-mobi-api' });
 
-// 获取解锁歌曲 URL
+interface SongUrlResult {
+  code: number;
+  url: string | null;
+}
+
 export const unlockSongUrl = async (
   id: number,
   keyword: string,
   server: "netease" | "kuwo"
 ): Promise<any> => {
-  // 创建错误响应对象
   const createErrorResponse = () => {
     return {
       size: 0,
@@ -67,8 +73,8 @@ export const unlockSongUrl = async (
 
   if (server === "netease") {
     try {
-      const response = await axios.get(
-        `https://301.tym.us.kg/https://music-api.gdstudio.xyz/api.php?types=url&source=netease&id=${id}&br=128`
+      const response = await neteaseApi.get(
+        `/api.php?types=url&source=netease&id=${id}&br=128`
       );
       const songUrl = response.data?.url;
       if (songUrl) {
@@ -87,9 +93,9 @@ export const unlockSongUrl = async (
       if (!songId) {
         return createErrorResponse();
       }
-      const songUrl = await getKuwoSongUrl(songId);
-      if (songUrl) {
-        return songUrl;
+      const songUrlResult = await getKuwoSongUrl(songId);
+      if (songUrlResult.url) {
+        return songUrlResult.url; // 直接返回url字符串
       } else {
         console.error("Kuwo API Error: Song URL not found.");
         return createErrorResponse();
@@ -104,8 +110,8 @@ export const unlockSongUrl = async (
 };
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
-  const response = await axios.get(
-    `https://kw-api.tym.us.kg/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
+  const response = await kuwoSearchApi.get(
+    `/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
   );
   return (
     response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
@@ -113,28 +119,28 @@ const getKuwoSongId = async (keyword: string): Promise<string | null> => {
     ) || null
   );
 };
-const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
+
+const getKuwoSongUrl = async (songId: string): Promise<SongUrlResult> => {
   try {
-    if (!keyword) return { code: 404, url: null };
-    const songId = await getKuwoSongId(keyword);
     if (!songId) return { code: 404, url: null };
 
-    // 请求地址
+
     const PackageName = "kwplayer_ar_5.1.0.0_B_jiakong_vh.apk";
     const query = `corp=kuwo&source=${PackageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
     const encryptedQuery = encryptQuery(query);
 
-    const url = `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`;
-    const response = await axios.get(url, {
+    const url = `/mobi.s?f=kuwo&q=${encryptedQuery}`;
+    const response = await kuwoMobiApi.get(url, {
       headers: {
         "User-Agent": "okhttp/3.10.0",
       },
     });
 
     if (response.data) {
-      const urlMatch = response.data.match(/http[^\s$"]+/)[0];
-      console.log(" KuwoSong URL:", urlMatch);
-      return { code: 200, url: urlMatch };
+      const urlMatch = response.data.match(/http[^\s$"]+/);
+      const extractedUrl = urlMatch ? urlMatch[0] : null;
+      console.log(" KuwoSong URL:", extractedUrl);
+      return { code: 200, url: extractedUrl };
     }
 
     return { code: 404, url: null };
