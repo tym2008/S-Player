@@ -524,7 +524,7 @@ class Player {
         // 正常播放地址
         if (url) {
           statusStore.playUblock = false;
-          await this.createPlayer("https://proxy.tym.us.kg/"+url, autoPlay, seek);
+          await this.createPlayer(url, autoPlay, seek);
         }
         // 尝试解灰
         else if (type !== "radio" && settingStore.useSongUnlock) {
@@ -534,7 +534,7 @@ class Player {
             window.$message.success("替换成功 结果:"+unlockUrl.slice(0, 50)+"...");
             statusStore.playUblock = true;
             console.log("🎼 Song unlock successfully:", unlockUrl);
-            await this.createPlayer("https://proxy.tym.us.kg/"+unlockUrl, autoPlay, seek);
+            await this.createPlayer(unlockUrl, autoPlay, seek);
           } else {
             window.$message.error("替换失败")
             statusStore.playUblock = false;
