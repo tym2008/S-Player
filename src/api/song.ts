@@ -53,10 +53,6 @@ const neteaseApi = axios.create({ baseURL: '/netease-api' });
 const kuwoSearchApi = axios.create({ baseURL: '/kuwo-search-api' });
 const kuwoMobiApi = axios.create({ baseURL: '/kuwo-mobi-api' });
 
-interface SongUrlResult {
-  code: number;
-  url: string | null;
-}
 
 export const unlockSongUrl = async (
   id: number,
