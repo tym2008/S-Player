@@ -3,7 +3,7 @@ import request from "@/utils/request";
 import { encryptQuery } from "./kwDES";
 import { SongUrlResult } from "./unblock";
 import axios from "axios";
-
+axios.defaults.maxRedirects = 5; // 允许最多 5 次重定向
 // 获取歌曲详情
 export const songDetail = (ids: number | number[]) => {
   return request({
