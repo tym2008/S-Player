@@ -142,15 +142,8 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
     return { code: 404, url: null };
   }
 };
-// 获取歌曲歌词
-export const songLyric = (id: number) => {
-  return request({
-    url: "/lyric/new",
-    params: {
-      id,
-    },
-  });
-};
+
+
 // 获取歌曲歌词
 export const songLyric = (id: number) => {
   return request({
