@@ -48,6 +48,7 @@ export const songUrl = (
 };
 
 
+
 // 获取解锁歌曲 URL
 export const unlockSongUrl = async (
   id: number,
@@ -58,7 +59,10 @@ export const unlockSongUrl = async (
   const createErrorResponse = () => {
     return {
       size: 0,
-	@@ -67,8 +73,8 @@ export const unlockSongUrl = async (
+      br: 320.001,
+      url: "",
+    };
+  };
 
   if (server === "netease") {
     try {
@@ -67,7 +71,18 @@ export const unlockSongUrl = async (
       );
       const songUrl = response.data?.url;
       if (songUrl) {
-	@@ -87,9 +93,9 @@ export const unlockSongUrl = async (
+        return songUrl;
+      } else {
+        console.error("Netease API Error: Song URL not found.");
+        return createErrorResponse();
+      }
+    } catch (error) {
+      console.error("Netease API Error:", error);
+      return createErrorResponse();
+    }
+  } else if (server === "kuwo") {
+    try {
+      const songId = await getKuwoSongId(keyword);
       if (!songId) {
         return createErrorResponse();
       }
@@ -77,7 +92,14 @@ export const unlockSongUrl = async (
       } else {
         console.error("Kuwo API Error: Song URL not found.");
         return createErrorResponse();
-	@@ -104,37 +110,37 @@ export const unlockSongUrl = async (
+      }
+    } catch (error) {
+      console.error("Kuwo API Error:", error);
+      return createErrorResponse();
+    }
+  } else {
+    return createErrorResponse();
+  }
 };
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
@@ -120,8 +142,15 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
     return { code: 404, url: null };
   }
 };
-
-
+// 获取歌曲歌词
+export const songLyric = (id: number) => {
+  return request({
+    url: "/lyric/new",
+    params: {
+      id,
+    },
+  });
+};
 // 获取歌曲歌词
 export const songLyric = (id: number) => {
   return request({
