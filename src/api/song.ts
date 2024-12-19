@@ -104,7 +104,7 @@ export const unlockSongUrl = async (
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
   const response = await axios.get(
-    `https://kw-api.tym.us.kg/r.s?all=${keyword}&rformat=json&encoding=utf8&show_copyright_off=1&mobi=1&correct=1&searchapi=6`
+    `https://kw-api.tym.us.kg/r.s?&correct=1&stype=comprehensive&encoding=utf8&rformat=json&mobi=1&show_copyright_off=1&searchapi=6&all=${keyword}'
   );
   return (
     response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
