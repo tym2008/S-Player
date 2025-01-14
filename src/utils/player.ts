@@ -142,7 +142,7 @@ class Player {
    * @param id 歌曲id
    * @returns 播放链接
    */
-  private async getOnlineUrl(id: number): Promise<string | null> {
+  /*private async getOnlineUrl(id: number): Promise<string | null> {
     const settingStore = useSettingStore();
     const res = await songUrl(id, settingStore.songLevel);
     console.log(`🌐 ${id} music data:`, res);
@@ -159,6 +159,51 @@ class Player {
     // 客户端直接返回，网页端转 https
     const url = isElectron ? songData.url : songData.url.replace(/^http:/, "https:");
     return url;
+  }*/
+//添加CORS跨域请求检查，防止CORS错误
+  private async getOnlineUrl(id: number): Promise<string | null> {
+    const settingStore = useSettingStore();
+    try {
+      const res = await songUrl(id, settingStore.songLevel);
+      console.log(`🌐 ${id} music data:`, res);
+      const songData = res.data?.[0];
+      if (!songData || !songData?.url) return null;
+
+      if (songData?.freeTrialInfo !== null) {
+        if (settingStore.playSongDemo) {
+          window.$message.warning("当前歌曲仅可试听，请开通会员后重试");
+        } else return null;
+      }
+
+      const url = songData.url;
+
+      // 检查CORS策略
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) {
+          throw new Error(`CORS check failed with status ${response.status}`);
+        }
+        // CORS check passed, return URL directly
+        return isElectron ? url : url.replace(/^http:/, "https:");
+      } catch (corsError) {
+        console.warn("CORS issue detected:", corsError);
+        // CORS blocked, fallback to unlockSongUrl
+        window.$message.warning("CORS 策略阻止了直接播放，尝试音源替换");
+        const unlockUrl = await this.getUnlockSongUrl({ id } as SongType); // Provide minimal song data
+        if (unlockUrl) {
+          window.$message.success("音源替换成功:" + unlockUrl.slice(0, 50) + "...");
+          return unlockUrl;
+        } else {
+          window.$message.error("音源替换失败");
+          return null;
+        }
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching song URL:", error);
+      return null;
+    }
   }
   /**
    * 获取解锁播放链接
