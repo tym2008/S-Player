@@ -67,7 +67,7 @@ export const unlockSongUrl = async (
   if (server === "netease") {
     try {
       const response = await axios.get(
-        `https://gd-api.tym.us.kg/api.php?types=url&source=netease&id=${id}&br=128`
+        `https://gd-api.tym.dpdns.org/api.php?types=url&source=netease&id=${id}&br=128`
       );
       const songUrl = response.data?.url;
       if (songUrl) {
@@ -104,7 +104,7 @@ export const unlockSongUrl = async (
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
   const response = await axios.get(
-    `https://kw-api.tym.us.kg/r.s?&correct=1&stype=comprehensive&encoding=utf8&rformat=json&mobi=1&show_copyright_off=1&searchapi=6&all=${keyword}`
+    `https://kw-api.tym.dpdns.org/r.s?&correct=1&stype=comprehensive&encoding=utf8&rformat=json&mobi=1&show_copyright_off=1&searchapi=6&all=${keyword}`
   );
   return (
     response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
