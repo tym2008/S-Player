@@ -171,7 +171,7 @@ class Player {
         } else return null;
       }
 
-      const url = songData.url;
+      const url = songData.url.replace(/^http:/, "https:");
 
       // 检查CORS策略
       try {
