@@ -69,7 +69,7 @@
     "md5": "^2.3.0",
     "music-metadata": "10.5.1",
     "pinia": "^2.3.1",
-    "pinia-plugin-persistedstate": "^3.2.1",
+    "pinia-plugin-persistedstate": "4.2.0",
     "plyr": "^3.7.8",
     "vue-virt-list": "^1.5.10"
   },
@@ -109,7 +109,7 @@
     "unplugin-vue-components": "^28.5.0",
     "vite": "^5.4.18",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-wasm": "4.2.0",
+    "vite-plugin-wasm": "^3.4.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "vue-tsc": "^2.2.8"
