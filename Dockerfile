@@ -13,7 +13,7 @@ COPY . .
 
 # add .env.example to .env
 #RUN [ ! -e ".env" ] && cp .env.example .env || true
-cp .env.example .env
+RUN cp .env.example .env
 
 RUN npm run build
 
