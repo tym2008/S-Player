@@ -215,10 +215,10 @@ class Player {
       // 尝试解锁
       const [neteaseUrl, kuwoUrl] = await Promise.all([
         unlockSongUrl(songId, keyWord, "netease"),
-        null,
+        unlockSongUrl(songId, keyWord, "kuwo"),
       ]);
       if (neteaseUrl !== "") return neteaseUrl;
-      //if (kuwoUrl.url !== null && kuwoUrl.code === 200) return kuwoUrl.url;
+      if (kuwoUrl.url !== null && kuwoUrl.code === 200) return kuwoUrl.url;
       return null;
     } catch (error) {
       console.error("Error in getUnlockSongUrl", error);
