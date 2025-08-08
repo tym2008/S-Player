@@ -428,9 +428,13 @@ class Player {
     // 更新频谱数据
     const updateSpectrumData = () => {
       if (this.analyser && this.dataArray) {
+        /*
         this.analyser.getByteFrequencyData(this.dataArray);
         // 保存数据
-        statusStore.spectrumsData = Array.from(this.dataArray);
+        statusStore.spectrumsData = Array.from(this.dataArray);*/
+        this.analyser.getByteFrequencyData(this.dataArray);
+        // 通过创建一个新的 Uint8Array 实例来解决类型冲突，并转换为普通数组
+        statusStore.spectrumsData = Array.from(new Uint8Array(this.dataArray));
       }
       requestAnimationFrame(updateSpectrumData);
     };
