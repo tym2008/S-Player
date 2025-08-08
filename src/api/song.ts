@@ -67,7 +67,7 @@ export const unlockSongUrl = async (
   if (server === "netease") {
     try {
       const response = await axios.get(
-        `https://gd-api.tym.dpdns.org/api.php?types=url&source=netease&id=${id}&br=128`
+        `https://gd-api-eo.tym.dpdns.org/api.php?types=url&source=netease&id=${id}&br=128`
       );
       const songUrl = response.data?.url;
       if (songUrl) {
