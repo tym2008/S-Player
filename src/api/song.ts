@@ -104,7 +104,7 @@ export const unlockSongUrl = async (
 
 const getKuwoSongId = async (keyword: string): Promise<string | null> => {
   const response = await axios.get(
-    `https://kw-api.tym.dpdns.org/r.s?&correct=1&stype=comprehensive&encoding=utf8&rformat=json&mobi=1&show_copyright_off=1&searchapi=6&all=${keyword}`
+    `https://kw-api-eo.tym.dpdns.org/r.s?&correct=1&stype=comprehensive&encoding=utf8&rformat=json&mobi=1&show_copyright_off=1&searchapi=6&all=${keyword}`
   );
   return (
     response.data?.content?.[1]?.musicpage?.abslist?.[0]?.MUSICRID?.slice(
@@ -123,7 +123,7 @@ const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
     const query = `corp=kuwo&source=${PackageName}&p2p=1&type=convert_url2&sig=0&format=mp3&rid=${songId}`;
     const encryptedQuery = encryptQuery(query);
 
-    const url = `http://mobi.kuwo.cn/mobi.s?f=kuwo&q=${encryptedQuery}`;
+    const url = `http://kw-mobi-eo.tym.dpdns.org/mobi.s?f=kuwo&q=${encryptedQuery}`;
     const response = await axios.get(url, {
       headers: {
         "User-Agent": "okhttp/3.10.0",
