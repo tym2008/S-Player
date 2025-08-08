@@ -114,6 +114,7 @@ const getKuwoSongId = async (keyword: string): Promise<string | null> => {
 };
 const getKuwoSongUrl = async (keyword: string): Promise<SongUrlResult> => {
   try {
+    return { code: 404, url: null }
     if (!keyword) return { code: 404, url: null };
     const songId = await getKuwoSongId(keyword);
     if (!songId) return { code: 404, url: null };
