@@ -18,8 +18,8 @@ class BlobURLManager {
         // console.log("🌱 Blob URL already exists:", key);
         return this.blobURLs.get(key)!;
       }
-      //const blob = new Blob([data], { type: format });
-      const blob = new Blob([new Uint8Array(data)], { type: format });
+      const blob = new Blob([data], { type: format });
+      //const blob = new Blob([new Uint8Array(data)], { type: format });
       const blobURL = URL.createObjectURL(blob);
       // 存储 Blob URL
       this.blobURLs.set(key, blobURL);
