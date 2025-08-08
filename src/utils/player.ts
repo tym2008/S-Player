@@ -213,12 +213,14 @@ class Player {
       if (!songId || !keyWord) return null;
       window.$message.warning("音源替换参数 Keyword:"+keyWord+" songId:"+songId);
       // 尝试解锁
+      /*
       const [neteaseUrl, kuwoUrl] = await Promise.all([
         unlockSongUrl(songId, keyWord, "netease"),
         unlockSongUrl(songId, keyWord, "kuwo"),
-      ]);
+      ]);*/
+      const neteaseUrl = await unlockSongUrl(songId, keyWord, "netease");
       if (neteaseUrl !== "") return neteaseUrl;
-      if (kuwoUrl.url !== null && kuwoUrl.code === 200) return kuwoUrl.url;
+      //if (kuwoUrl.url !== null && kuwoUrl.code === 200) return kuwoUrl.url;
       return null;
     } catch (error) {
       console.error("Error in getUnlockSongUrl", error);
