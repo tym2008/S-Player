@@ -309,11 +309,10 @@ class SongManager {
     return { id: songId, url: undefined };
   }
 
-  // 过滤出当前 unlockSongUrl 支持的服务器
-  const supportedServers = servers.filter(
-    (server): server is "netease" | "kuwo" =>
-      server === SongUnlockServer.NETEASE || server === SongUnlockServer.KUWO,
-  );
+  // 过滤出当前 unlockSongUrl 支持的服务器，并转为字符串字面量类型
+const supportedServers = servers
+  .map((s) => s as string)
+  .filter((s): s is "netease" | "kuwo" => s === "netease" || s === "kuwo");
 
   if (supportedServers.length === 0) {
     return { id: songId, url: undefined };
