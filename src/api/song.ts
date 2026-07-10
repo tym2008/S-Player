@@ -61,7 +61,7 @@ export const songUrl = (
     },
   });
 };
-
+/*
 // 获取解锁歌曲 URL
 export const unlockSongUrl = (
   id: number,
@@ -76,6 +76,49 @@ export const unlockSongUrl = (
     url: `/${server}`,
     params: { ...params, noCookie: true },
   });
+};
+*/
+
+
+// 获取解锁歌曲 URL (使用独立的axios实例)
+export const unlockSongUrl = async (
+  id: number,
+  _keyword: string, // 使用下划线前缀表示该参数被有意忽略
+  server: "netease" | "kuwo"
+): Promise<{ code: number; url: string | null }> => {
+  if (server === "netease") {
+    try {
+      window.$message.warning("正在尝试替换音源");
+      // 2. 使用原始的 axios.get 方法发起请求
+      // 这会创建一个不带任何项目默认配置（如headers, withCredentials）的“干净”请求
+      const response = await axios.get("https://gd-api.tym.dpdns.org/api.php", {
+        params: {
+          types: "url",
+          source: "netease",
+          id,
+          br: 128,
+        },
+      });
+
+      // 检查返回的数据并构造成调用方期望的格式
+      if (response && response.data && response.data.url) {
+        window.$message.success("音源替换成功:" + response.data.url.slice(0, 50) + "...");
+        return { code: 200, url: response.data.url };
+      } else {
+        console.error(`[Unlock] Netease API for song ${id} returned no URL.`);
+        return { code: 404, url: null };
+      }
+    } catch (error) {
+      console.error(`[Unlock] Netease API request for song ${id} failed:`, error);
+      return { code: 500, url: null };
+    }
+  }
+
+  if (server === "kuwo") {
+    return { code: 404, url: null };
+  }
+
+  return { code: 400, url: null };
 };
 
 // 获取歌曲歌词
