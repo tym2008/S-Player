@@ -285,8 +285,8 @@ class SongDownloadStrategy implements DownloadStrategy {
       try {
         const servers = this.settingStore.songUnlockServer
   .filter((s) => s.enabled)
-  .map((s) => s.key)
-  .filter((server): server is "netease" | "kuwo" => server === "netease" || server === "kuwo");
+  .map((s) => s.key as string)
+  .filter((s): s is "netease" | "kuwo" => s === "netease" || s === "kuwo");
 
 const artist =
   (Array.isArray(this.song.artists)
