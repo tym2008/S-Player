@@ -280,9 +280,14 @@ const contributors = [
     description: "网易云音乐 API",
   },
   {
-    name: "UnblockNeteaseMusic",
-    url: "https://github.com/UnblockNeteaseMusic/server",
-    description: "Revive unavailable songs for Netease Cloud Music",
+    name: "GD音乐台",
+    url: "https://music.gdstudio.xyz",
+    description: "开发者音乐API",
+  },
+  {
+    name: "NeteaseCloudMusicApiEnhanced",
+    url: "https://github.com/neteasecloudmusicapienhanced/api-enhanced",
+    description: "网易云音乐 API 备份 + 增强",
   },
 ];
 
