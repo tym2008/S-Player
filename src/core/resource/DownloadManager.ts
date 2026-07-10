@@ -284,40 +284,40 @@ class SongDownloadStrategy implements DownloadStrategy {
     if (this.settingStore.useUnlockForDownload && canUseUnlock) {
       try {
         const servers = this.settingStore.songUnlockServer
-          .filter((s) => s.enabled)
-          .map((s) => s.key);
-        const artist =
-          (Array.isArray(this.song.artists)
-            ? this.song.artists.map((a) => a.name).join(" & ")
-            : this.song.artists) || "";
-        const keyWord = `${this.song.name}-${artist}`;
+  .filter((s) => s.enabled)
+  .map((s) => s.key)
+  .filter((server): server is "netease" | "kuwo" => server === "netease" || server === "kuwo");
 
-        if (servers.length > 0) {
-          const results = await Promise.allSettled(
-            servers.map((server) =>
-              unlockSongUrl(this.song.id, keyWord, server, this.song.name, String(artist)).then(
-                (result) => ({
-                  server,
-                  result,
-                  success: result.code === 200 && !!result.url,
-                }),
-              ),
-            ),
-          );
+const artist =
+  (Array.isArray(this.song.artists)
+    ? this.song.artists.map((a) => a.name).join(" & ")
+    : this.song.artists) || "";
+const keyWord = `${this.song.name}-${artist}`;
 
-          for (const r of results) {
-            if (r.status === "fulfilled" && r.value.success) {
-              const unlockUrl = r.value?.result?.url;
-              if (unlockUrl) {
-                const extensionMatch = unlockUrl.match(/\.([a-z0-9]+)(?:[?#]|$)/i);
-                return {
-                  url: unlockUrl,
-                  type: extensionMatch ? extensionMatch[1].toLowerCase() : "mp3",
-                };
-              }
-            }
-          }
-        }
+if (servers.length > 0) {
+  const results = await Promise.allSettled(
+    servers.map((server) =>
+      unlockSongUrl(this.song.id, keyWord, server).then((result) => ({
+        server,
+        result,
+        success: result.code === 200 && !!result.url,
+      })),
+    ),
+  );
+
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value.success) {
+      const unlockUrl = r.value.result.url;
+      if (!unlockUrl) continue;
+
+      const extensionMatch = unlockUrl.match(/\.([a-z0-9]+)(?:[?#]|$)/i);
+      return {
+        url: unlockUrl,
+        type: extensionMatch ? extensionMatch[1].toLowerCase() : "mp3",
+      };
+    }
+  }
+}
       } catch (e) {
         console.error("Error fetching unlock url for download:", e);
       }
