@@ -133,7 +133,7 @@ class SongManager {
   }
 
   /**
-   * 检查本地缓存
+   * 检查本地缓存（仅 Electron 环境有效）
    * @param id 歌曲id
    * @param quality 音质
    * @param md5 歌曲文件md5
@@ -164,7 +164,7 @@ class SongManager {
   };
 
   /**
-   * 触发缓存下载
+   * 触发缓存下载（仅 Electron 环境有效）
    * @param id 歌曲id
    * @param url 下载地址
    * @param quality 音质
@@ -243,14 +243,14 @@ class SongManager {
       quality = handleSongQuality(songData, "online");
     }
 
-    // 检查本地缓存
+    // 检查本地缓存（仅 Electron 有效，网页环境直接跳过）
     if (finalUrl && quality) {
       const cachedUrl = await this.checkLocalCache(id, quality, songData?.md5);
       if (cachedUrl) {
         return { id, url: cachedUrl, isTrial, quality };
       }
     }
-    // 缓存对应音质音乐
+    // 缓存对应音质音乐（仅 Electron 有效）
     if (finalUrl) {
       this.triggerCacheDownload(id, finalUrl, quality);
     }
@@ -259,7 +259,7 @@ class SongManager {
 
   /**
    * 获取解锁播放链接
-   * @param songData 歌曲数据
+   * @param song 歌曲数据
    * @param specificSource 指定解锁源
    * @returns
    */
@@ -269,8 +269,9 @@ class SongManager {
   ): Promise<AudioSource> => {
     const settingStore = useSettingStore();
     const songId = song.id;
-    // 优先检查本地缓存 (仅在未指定源或指定为 auto 时)
-    if (!specificSource || specificSource === "auto") {
+
+    // 优先检查本地缓存（仅在 Electron 环境、未指定源或指定为 auto 时）
+    if (isElectron && (!specificSource || specificSource === "auto")) {
       const cachedUrl = await this.checkLocalCache(songId);
       if (cachedUrl) {
         // Auto 模式下命中缓存，尝试获取第一个启用的源作为标识
@@ -286,6 +287,7 @@ class SongManager {
         };
       }
     }
+
     const artistName = Array.isArray(song.artists)
       ? song.artists.map((a) => a.name).join(" & ")
       : song.artists;
@@ -325,7 +327,7 @@ class SongManager {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.success) {
         const unlockUrl = r.value?.result?.url;
-        // 解锁成功后，触发下载
+        // 解锁成功后，触发下载（仅 Electron 有效）
         this.triggerCacheDownload(songId, unlockUrl);
         // 推断音质
         let quality = QualityType.HQ;
@@ -428,8 +430,10 @@ class SongManager {
       // 在线歌曲：优先官方，其次解灰
       const songId = nextSong.type === "radio" ? nextSong.dj?.id : nextSong.id;
       if (!songId) return;
-      // 是否可解锁
-      const canUnlock = isElectron && nextSong.type !== "radio" && settingStore.useSongUnlock;
+
+      // 是否可解锁：网页环境也允许解锁（排除 radio 类型）
+      const canUnlock = nextSong.type !== "radio" && settingStore.useSongUnlock;
+
       // 先请求官方地址
       const { url: officialUrl, isTrial, quality } = await this.getOnlineUrl(songId, false);
       if (officialUrl && !isTrial) {
@@ -483,7 +487,7 @@ class SongManager {
   public getAudioSource = async (song: SongType, forceSource?: string): Promise<AudioSource> => {
     const settingStore = useSettingStore();
 
-    // 本地文件直接返回
+    // 本地文件直接返回（仅 Electron 环境存在本地文件）
     if (song.path && song.type !== "streaming") {
       // 检查本地文件是否存在
       const result = await window.electron.ipcRenderer.invoke("file-exists", song.path);
@@ -529,8 +533,8 @@ class SongManager {
 
     // 在线获取
     try {
-      // 是否可解锁
-      const canUnlock = isElectron && song.type !== "radio" && settingStore.useSongUnlock;
+      // 是否可解锁：网页环境也允许解锁（排除 radio 类型）
+      const canUnlock = song.type !== "radio" && settingStore.useSongUnlock;
 
       // 如果指定了非官方源，直接走解锁流程
       if (forceSource && forceSource !== "auto") {
@@ -564,7 +568,7 @@ class SongManager {
           return unlockUrl;
         }
       }
-      // 最后的兜底：检查本地是否有缓存（不区分音质）
+      // 最后的兜底：检查本地是否有缓存（仅 Electron 有效，不区分音质）
       if (!forceSource || forceSource === "auto") {
         const fallbackUrl = await this.checkLocalCache(songId);
         if (fallbackUrl) {
@@ -582,7 +586,7 @@ class SongManager {
       return { id: songId, url: undefined, quality: undefined, isUnlocked: false };
     } catch (e) {
       console.error(`❌ [${songId}] 获取音频源异常:`, e);
-      // 异常时的兜底：检查本地是否有缓存
+      // 异常时的兜底：检查本地是否有缓存（仅 Electron 有效）
       if (!forceSource || forceSource === "auto") {
         const fallbackUrl = await this.checkLocalCache(songId);
         if (fallbackUrl) {
