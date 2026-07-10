@@ -311,41 +311,46 @@ class SongManager {
     }
 
     // 并发执行
-    const results = await Promise.allSettled(
-      servers.map((server) =>
-        unlockSongUrl(songId, keyWord, server, song.name, String(artistName || "")).then(
-          (result) => ({
-            server,
-            result,
-            success: result.code === 200 && !!result.url,
-          }),
-        ),
-      ),
-    );
+    const supportedServers = servers.filter(
+  (server): server is "netease" | "kuwo" =>
+    server === SongUnlockServer.NETEASE || server === SongUnlockServer.KUWO,
+);
+
+const results = await Promise.allSettled(
+  supportedServers.map((server) =>
+    unlockSongUrl(songId, keyWord, server).then((result) => ({
+      server,
+      result,
+      success: result.code === 200 && !!result.url,
+    })),
+  ),
+);
 
     // 按顺序找成功项
     for (const r of results) {
-      if (r.status === "fulfilled" && r.value.success) {
-        const unlockUrl = r.value?.result?.url;
-        // 解锁成功后，触发下载（仅 Electron 有效）
-        this.triggerCacheDownload(songId, unlockUrl);
-        // 推断音质
-        let quality = QualityType.HQ;
-        if (unlockUrl && (unlockUrl.includes(".flac") || unlockUrl.includes(".wav"))) {
-          quality = QualityType.SQ;
-        }
-        console.log(`最终音质判断：详细输出：`, { unlockUrl, quality });
-        return {
-          id: songId,
-          url: unlockUrl,
-          isUnlocked: true,
-          quality,
-          source: r.value.server,
-        };
-      }
+  if (r.status === "fulfilled" && r.value.success) {
+    const unlockUrl = r.value.result.url;
+    if (!unlockUrl) continue;
+
+    // 解锁成功后，触发下载
+    this.triggerCacheDownload(songId, unlockUrl);
+
+    // 推断音质
+    let quality = QualityType.HQ;
+    if (unlockUrl.includes(".flac") || unlockUrl.includes(".wav")) {
+      quality = QualityType.SQ;
     }
-    return { id: songId, url: undefined };
-  };
+
+    console.log(`最终音质判断：详细输出：`, { unlockUrl, quality });
+    return {
+      id: songId,
+      url: unlockUrl,
+      isUnlocked: true,
+      quality,
+      source: r.value.server,
+    };
+  }
+}
 
   /**
    * 预载下一首歌曲
