@@ -3,7 +3,7 @@ import { defaultAMLLDbServer, songLevelData } from "@/utils/meta";
 import { SongUnlockServer } from "@/core/player/SongManager";
 import { useSettingStore } from "@/stores";
 import request from "@/utils/request";
-
+import axios from "axios";
 // 获取歌曲详情
 export const songDetail = (ids: number | number[]) => {
   return request({
