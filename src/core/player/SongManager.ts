@@ -264,94 +264,101 @@ class SongManager {
    * @returns
    */
   public getUnlockSongUrl = async (
-    song: SongType,
-    specificSource?: string,
-  ): Promise<AudioSource> => {
-    const settingStore = useSettingStore();
-    const songId = song.id;
+  song: SongType,
+  specificSource?: string,
+): Promise<AudioSource> => {
+  const settingStore = useSettingStore();
+  const songId = song.id;
 
-    // 优先检查本地缓存（仅在 Electron 环境、未指定源或指定为 auto 时）
-    if (isElectron && (!specificSource || specificSource === "auto")) {
-      const cachedUrl = await this.checkLocalCache(songId);
-      if (cachedUrl) {
-        // Auto 模式下命中缓存，尝试获取第一个启用的源作为标识
-        let source: AudioSourceType = SongUnlockServer.NETEASE;
-        const firstEnabled = settingStore.songUnlockServer.find((s) => s.enabled);
-        if (firstEnabled) source = firstEnabled.key as AudioSourceType;
-        return {
-          id: songId,
-          url: cachedUrl,
-          isUnlocked: true,
-          source,
-          quality: QualityType.HQ,
-        };
-      }
+  // 优先检查本地缓存（仅在 Electron 环境、未指定源或指定为 auto 时）
+  if (isElectron && (!specificSource || specificSource === "auto")) {
+    const cachedUrl = await this.checkLocalCache(songId);
+    if (cachedUrl) {
+      let source: AudioSourceType = SongUnlockServer.NETEASE;
+      const firstEnabled = settingStore.songUnlockServer.find((s) => s.enabled);
+      if (firstEnabled) source = firstEnabled.key as AudioSourceType;
+      return {
+        id: songId,
+        url: cachedUrl,
+        isUnlocked: true,
+        source,
+        quality: QualityType.HQ,
+      };
     }
-
-    const artistName = Array.isArray(song.artists)
-      ? song.artists.map((a) => a.name).join(" & ")
-      : song.artists;
-    const keyWord = song.name + "-" + artistName;
-    if (!songId || !keyWord) {
-      return { id: songId, url: undefined };
-    }
-
-    // 获取音源列表
-    let servers: SongUnlockServer[] = [];
-    if (specificSource && specificSource !== "auto") {
-      servers = [specificSource as SongUnlockServer];
-    } else {
-      servers = settingStore.songUnlockServer
-        .filter((s) => s.enabled)
-        .map((s) => s.key as SongUnlockServer);
-    }
-
-    if (servers.length === 0) {
-      return { id: songId, url: undefined };
-    }
-
-    // 并发执行
-    const supportedServers = servers.filter(
-  (server): server is "netease" | "kuwo" =>
-    server === SongUnlockServer.NETEASE || server === SongUnlockServer.KUWO,
-);
-
-const results = await Promise.allSettled(
-  supportedServers.map((server) =>
-    unlockSongUrl(songId, keyWord, server).then((result) => ({
-      server,
-      result,
-      success: result.code === 200 && !!result.url,
-    })),
-  ),
-);
-
-    // 按顺序找成功项
-    for (const r of results) {
-  if (r.status === "fulfilled" && r.value.success) {
-    const unlockUrl = r.value.result.url;
-    if (!unlockUrl) continue;
-
-    // 解锁成功后，触发下载
-    this.triggerCacheDownload(songId, unlockUrl);
-
-    // 推断音质
-    let quality = QualityType.HQ;
-    if (unlockUrl.includes(".flac") || unlockUrl.includes(".wav")) {
-      quality = QualityType.SQ;
-    }
-
-    console.log(`最终音质判断：详细输出：`, { unlockUrl, quality });
-    return {
-      id: songId,
-      url: unlockUrl,
-      isUnlocked: true,
-      quality,
-      source: r.value.server,
-    };
   }
-}
 
+  const artistName = Array.isArray(song.artists)
+    ? song.artists.map((a) => a.name).join(" & ")
+    : song.artists;
+  const keyWord = song.name + "-" + artistName;
+  if (!songId || !keyWord) {
+    return { id: songId, url: undefined };
+  }
+
+  // 获取音源列表
+  let servers: SongUnlockServer[] = [];
+  if (specificSource && specificSource !== "auto") {
+    servers = [specificSource as SongUnlockServer];
+  } else {
+    servers = settingStore.songUnlockServer
+      .filter((s) => s.enabled)
+      .map((s) => s.key as SongUnlockServer);
+  }
+
+  if (servers.length === 0) {
+    return { id: songId, url: undefined };
+  }
+
+  // 过滤出当前 unlockSongUrl 支持的服务器
+  const supportedServers = servers.filter(
+    (server): server is "netease" | "kuwo" =>
+      server === SongUnlockServer.NETEASE || server === SongUnlockServer.KUWO,
+  );
+
+  if (supportedServers.length === 0) {
+    return { id: songId, url: undefined };
+  }
+
+  // 并发执行
+  const results = await Promise.allSettled(
+    supportedServers.map((server) =>
+      unlockSongUrl(songId, keyWord, server).then((result) => ({
+        server,
+        result,
+        success: result.code === 200 && !!result.url,
+      })),
+    ),
+  );
+
+  // 按顺序找成功项
+  for (const r of results) {
+    if (r.status === "fulfilled" && r.value.success) {
+      const unlockUrl = r.value.result.url;
+      if (!unlockUrl) continue;
+
+      // 解锁成功后，触发下载（仅 Electron 有效）
+      this.triggerCacheDownload(songId, unlockUrl);
+
+      // 推断音质
+      let quality = QualityType.HQ;
+      if (unlockUrl.includes(".flac") || unlockUrl.includes(".wav")) {
+        quality = QualityType.SQ;
+      }
+
+      console.log(`最终音质判断：详细输出：`, { unlockUrl, quality });
+      return {
+        id: songId,
+        url: unlockUrl,
+        isUnlocked: true,
+        quality,
+        source: r.value.server,
+      };
+    }
+  }
+
+  // 所有源均失败
+  return { id: songId, url: undefined };
+};
   /**
    * 预载下一首歌曲
    * @returns 预载数据
