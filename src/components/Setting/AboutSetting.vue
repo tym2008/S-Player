@@ -282,7 +282,7 @@ const contributors = [
   {
     name: "GD音乐台",
     url: "https://music.gdstudio.xyz",
-    description: "开发者音乐API",
+    description: "GD音乐台 https://music.gdstudio.xyz",
   },
   {
     name: "NeteaseCloudMusicApiEnhanced",
