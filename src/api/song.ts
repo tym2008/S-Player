@@ -91,7 +91,7 @@ export const unlockSongUrl = async (
       window.$message.warning("正在尝试替换音源");
       // 2. 使用原始的 axios.get 方法发起请求
       // 这会创建一个不带任何项目默认配置（如headers, withCredentials）的“干净”请求
-      const response = await axios.get("https://gd-api.tym.dpdns.org/api.php", {
+      const response = await axios.get("https://gd-api.022928.xyz/api.php", {
         params: {
           types: "url",
           source: "netease",
